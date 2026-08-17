@@ -45,6 +45,9 @@
     background: #050505;
     border: 1px solid #333;
     image-rendering: pixelated;
+    max-width: 92vw;
+    height: auto;
+    touch-action: none;
   }
   .gate-stats {
     display: flex;
@@ -408,7 +411,7 @@
   </div>
   <div id="gateMsg"></div>
   <button id="startBtn">▶ START</button>
-  <div class="hint">← → or A/D to move · SPACE to shoot</div>
+  <div class="hint">← → / A/D + SPACE, or just drag on the ship to move &amp; fire</div>
 </div>
 
 <!-- ================= SNIPPET REVEAL ================= -->
@@ -712,6 +715,32 @@
   });
   document.addEventListener('keyup', (e) => {
     keys[e.key.toLowerCase()] = false;
+  });
+
+  // ---- touch controls: drag the ship to move, holding = auto-fire ----
+  function gateTouchToShipX(touch){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CW / rect.width;
+    const x = (touch.clientX - rect.left) * scaleX;
+    return Math.max(14, Math.min(CW - 14, x));
+  }
+  canvas.addEventListener('touchstart', (e) => {
+    if(!gameRunning) return;
+    e.preventDefault();
+    ship.x = gateTouchToShipX(e.touches[0]);
+    keys[' '] = true;
+  }, { passive: false });
+  canvas.addEventListener('touchmove', (e) => {
+    if(!gameRunning) return;
+    e.preventDefault();
+    ship.x = gateTouchToShipX(e.touches[0]);
+  }, { passive: false });
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keys[' '] = false;
+  }, { passive: false });
+  canvas.addEventListener('touchcancel', (e) => {
+    keys[' '] = false;
   });
 
   document.getElementById('startBtn').addEventListener('click', () => {
